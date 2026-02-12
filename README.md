@@ -1,5 +1,9 @@
 # Chatbot UI
 
+Dave Roteiro:
+npm i
+npm run chat
+
 The open-source AI chat app for everyone.
 
 <img src="./public/readme/screenshot.png" alt="Chatbot UI" width="600">
