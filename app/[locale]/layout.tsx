@@ -25,6 +25,7 @@ interface RootLayoutProps {
 }
 
 export const metadata: Metadata = {
+  metadataBase: new URL("http://localhost:3000"),
   applicationName: APP_NAME,
   title: {
     default: APP_DEFAULT_TITLE,
