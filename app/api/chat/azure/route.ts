@@ -3,6 +3,7 @@ import { ChatAPIPayload } from "@/types"
 import { OpenAIStream, StreamingTextResponse } from "ai"
 import OpenAI from "openai"
 import { ChatCompletionCreateParamsBase } from "openai/resources/chat/completions.mjs"
+import { logApiRequest } from "@/lib/logger"
 
 export const runtime = "edge"
 
@@ -49,6 +50,13 @@ export async function POST(request: Request) {
       baseURL: `${ENDPOINT}/openai/deployments/${DEPLOYMENT_ID}`,
       defaultQuery: { "api-version": "2023-12-01-preview" },
       defaultHeaders: { "api-key": KEY }
+    })
+
+    logApiRequest("Azure OpenAI", {
+      model: chatSettings.model,
+      messages,
+      temperature: chatSettings.temperature,
+      deploymentId: DEPLOYMENT_ID
     })
 
     const response = await azureOpenai.chat.completions.create({

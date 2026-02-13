@@ -3,6 +3,7 @@ import { checkApiKey, getServerProfile } from "@/lib/server/server-chat-helpers"
 import { ChatSettings } from "@/types"
 import { OpenAIStream, StreamingTextResponse } from "ai"
 import OpenAI from "openai"
+import { logApiRequest } from "@/lib/logger"
 
 export const runtime = "edge"
 export async function POST(request: Request) {
@@ -21,6 +22,13 @@ export async function POST(request: Request) {
     const groq = new OpenAI({
       apiKey: profile.groq_api_key || "",
       baseURL: "https://api.groq.com/openai/v1"
+    })
+
+    logApiRequest("Groq", {
+      model: chatSettings.model,
+      messages,
+      max_tokens:
+        CHAT_SETTING_LIMITS[chatSettings.model].MAX_TOKEN_OUTPUT_LENGTH
     })
 
     const response = await groq.chat.completions.create({

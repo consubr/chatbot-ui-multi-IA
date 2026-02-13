@@ -2,6 +2,7 @@ import { checkApiKey, getServerProfile } from "@/lib/server/server-chat-helpers"
 import { ChatSettings } from "@/types"
 import { OpenAIStream, StreamingTextResponse } from "ai"
 import OpenAI from "openai"
+import { logApiRequest } from "@/lib/logger"
 
 export const runtime = "edge"
 
@@ -21,6 +22,11 @@ export async function POST(request: Request) {
     const perplexity = new OpenAI({
       apiKey: profile.perplexity_api_key || "",
       baseURL: "https://api.perplexity.ai/"
+    })
+
+    logApiRequest("Perplexity", {
+      model: chatSettings.model,
+      messages
     })
 
     const response = await perplexity.chat.completions.create({

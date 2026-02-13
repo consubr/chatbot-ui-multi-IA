@@ -4,6 +4,7 @@ import { OpenAIStream, StreamingTextResponse } from "ai"
 import { ServerRuntime } from "next"
 import OpenAI from "openai"
 import { ChatCompletionCreateParamsBase } from "openai/resources/chat/completions.mjs"
+import { logApiRequest } from "@/lib/logger"
 
 export const runtime: ServerRuntime = "edge"
 
@@ -22,6 +23,12 @@ export async function POST(request: Request) {
     const openai = new OpenAI({
       apiKey: profile.openai_api_key || "",
       organization: profile.openai_organization_id
+    })
+
+    logApiRequest("OpenAI", {
+      model: chatSettings.model,
+      messages,
+      temperature: chatSettings.temperature
     })
 
     const response = await openai.chat.completions.create({

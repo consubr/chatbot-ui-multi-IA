@@ -1,6 +1,7 @@
 import { checkApiKey, getServerProfile } from "@/lib/server/server-chat-helpers"
 import { ChatSettings } from "@/types"
 import { GoogleGenerativeAI } from "@google/generative-ai"
+import { logApiRequest } from "@/lib/logger"
 
 export const runtime = "edge"
 
@@ -26,6 +27,13 @@ export async function POST(request: Request) {
       generationConfig: {
         temperature: chatSettings.temperature
       }
+    })
+
+    logApiRequest("Google", {
+      model: chatSettings.model,
+      history: messages,
+      lastMessage: lastMessage,
+      temperature: chatSettings.temperature
     })
 
     const response = await chat.sendMessageStream(lastMessage.parts)

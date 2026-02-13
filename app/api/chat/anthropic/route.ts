@@ -5,6 +5,7 @@ import { ChatSettings } from "@/types"
 import Anthropic from "@anthropic-ai/sdk"
 import { AnthropicStream, StreamingTextResponse } from "ai"
 import { NextRequest, NextResponse } from "next/server"
+import { logApiRequest } from "@/lib/logger"
 
 export const runtime = "edge"
 
@@ -57,6 +58,13 @@ export async function POST(request: NextRequest) {
 
     const anthropic = new Anthropic({
       apiKey: profile.anthropic_api_key || ""
+    })
+
+    logApiRequest("Anthropic", {
+      model: chatSettings.model,
+      messages: ANTHROPIC_FORMATTED_MESSAGES,
+      temperature: chatSettings.temperature,
+      system: messages[0].content
     })
 
     try {
