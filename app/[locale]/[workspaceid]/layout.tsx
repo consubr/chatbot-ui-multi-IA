@@ -2,7 +2,10 @@
 
 import { Dashboard } from "@/components/ui/dashboard"
 import { ChatbotUIContext } from "@/context/context"
-import { getAssistantWorkspacesByWorkspaceId } from "@/db/assistants"
+import {
+  getAssistantWorkspacesByWorkspaceId,
+  getPublicAssistants
+} from "@/db/assistants"
 import { getChatsByWorkspaceId } from "@/db/chats"
 import { getCollectionWorkspacesByWorkspaceId } from "@/db/collections"
 import { getFileWorkspacesByWorkspaceId } from "@/db/files"
@@ -95,9 +98,19 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
     setSelectedWorkspace(workspace)
 
     const assistantData = await getAssistantWorkspacesByWorkspaceId(workspaceId)
-    setAssistants(assistantData.assistants)
+    const publicAssistants = await getPublicAssistants()
 
-    for (const assistant of assistantData.assistants) {
+    const allAssistants = [...assistantData.assistants]
+
+    publicAssistants.forEach(publicAssistant => {
+      if (!allAssistants.some(a => a.id === publicAssistant.id)) {
+        allAssistants.push(publicAssistant)
+      }
+    })
+
+    setAssistants(allAssistants)
+
+    for (const assistant of allAssistants) {
       let url = ""
 
       if (assistant.image_path) {
