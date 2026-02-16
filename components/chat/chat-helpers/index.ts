@@ -100,7 +100,10 @@ export const createTempMessages = (
       role: "user",
       sequence_number: chatMessages.length,
       updated_at: "",
-      user_id: ""
+      user_id: "",
+      prompt_tokens: 0,
+      completion_tokens: 0,
+      total_tokens: 0
     },
     fileItems: []
   }
@@ -117,7 +120,10 @@ export const createTempMessages = (
       role: "assistant",
       sequence_number: chatMessages.length + 1,
       updated_at: "",
-      user_id: ""
+      user_id: "",
+      prompt_tokens: 0,
+      completion_tokens: 0,
+      total_tokens: 0
     },
     fileItems: []
   }
@@ -224,7 +230,10 @@ export const handleHostedChat = async (
   const requestBody = {
     chatSettings: payload.chatSettings,
     messages: formattedMessages,
-    customModelId: provider === "custom" ? modelData.hostedId : ""
+    customModelId: provider === "custom" ? modelData.hostedId : "",
+    assistantMessageId: isRegeneration
+      ? payload.chatMessages[payload.chatMessages.length - 1].message.id
+      : tempAssistantChatMessage.message.id
   }
 
   const response = await fetchChatResponse(
@@ -301,20 +310,25 @@ export const processResponse = async (
         setToolInUse("none")
 
         try {
-          contentToAdd = isHosted
-            ? chunk
-            : // Ollama's streaming endpoint returns new-line separated JSON
-              // objects. A chunk may have more than one of these objects, so we
-              // need to split the chunk by new-lines and handle each one
-              // separately.
-              chunk
-                .trimEnd()
-                .split("\n")
-                .reduce(
-                  (acc, line) => acc + JSON.parse(line).message.content,
-                  ""
-                )
-          fullText += contentToAdd
+          if (isHosted) {
+            // AI SDK v3 Data Stream format: https://sdk.vercel.ai/docs/concepts/back-end-communication
+            // We need to parse the chunks which are prefixed with a type code (e.g., '0' for text)
+            // Format: typeCode ":" data "\n"
+            const lines = chunk.split("\n")
+            for (const line of lines) {
+              if (line.startsWith("0:")) {
+                const text = JSON.parse(line.substring(2))
+                fullText += text
+              }
+            }
+          } else {
+            // Ollama logic...
+            contentToAdd = chunk
+              .trimEnd()
+              .split("\n")
+              .reduce((acc, line) => acc + JSON.parse(line).message.content, "")
+            fullText += contentToAdd
+          }
         } catch (error) {
           console.error("Error parsing JSON:", error)
         }
@@ -412,7 +426,10 @@ export const handleCreateMessages = async (
     model: modelData.modelId,
     role: "user",
     sequence_number: chatMessages.length,
-    image_paths: []
+    image_paths: [],
+    prompt_tokens: 0,
+    completion_tokens: 0,
+    total_tokens: 0
   }
 
   const finalAssistantMessage: TablesInsert<"messages"> = {
@@ -423,7 +440,10 @@ export const handleCreateMessages = async (
     model: modelData.modelId,
     role: "assistant",
     sequence_number: chatMessages.length + 1,
-    image_paths: []
+    image_paths: [],
+    prompt_tokens: 0,
+    completion_tokens: 0,
+    total_tokens: 0
   }
 
   let finalChatMessages: ChatMessage[] = []

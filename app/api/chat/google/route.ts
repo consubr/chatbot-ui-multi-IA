@@ -1,15 +1,19 @@
 import { checkApiKey, getServerProfile } from "@/lib/server/server-chat-helpers"
 import { ChatSettings } from "@/types"
-import { GoogleGenerativeAI } from "@google/generative-ai"
-import { logApiRequest } from "@/lib/logger"
+import { google } from "@ai-sdk/google"
+import { streamText } from "ai"
+import { createClient } from "@/lib/supabase/server"
+import { createDataStreamResponse } from "@/lib/stream-utils"
+import { cookies } from "next/headers"
 
 export const runtime = "edge"
 
 export async function POST(request: Request) {
   const json = await request.json()
-  const { chatSettings, messages } = json as {
+  const { chatSettings, messages, assistantMessageId } = json as {
     chatSettings: ChatSettings
     messages: any[]
+    assistantMessageId: string
   }
 
   try {
@@ -17,41 +21,27 @@ export async function POST(request: Request) {
 
     checkApiKey(profile.google_gemini_api_key, "Google")
 
-    const genAI = new GoogleGenerativeAI(profile.google_gemini_api_key || "")
-    const googleModel = genAI.getGenerativeModel({ model: chatSettings.model })
+    const result = await streamText({
+      model: google(chatSettings.model),
+      messages,
+      temperature: chatSettings.temperature,
+      onFinish: async ({ usage }) => {
+        const { inputTokens, outputTokens } = usage
+        const cookieStore = cookies()
+        const supabaseServer = createClient(cookieStore)
 
-    const lastMessage = messages.pop()
-
-    const chat = googleModel.startChat({
-      history: messages,
-      generationConfig: {
-        temperature: chatSettings.temperature
+        await supabaseServer
+          .from("messages")
+          .update({
+            prompt_tokens: inputTokens,
+            completion_tokens: outputTokens,
+            total_tokens: (inputTokens || 0) + (outputTokens || 0)
+          })
+          .eq("id", assistantMessageId)
       }
     })
 
-    logApiRequest("Google", {
-      model: chatSettings.model,
-      history: messages,
-      lastMessage: lastMessage,
-      temperature: chatSettings.temperature
-    })
-
-    const response = await chat.sendMessageStream(lastMessage.parts)
-
-    const encoder = new TextEncoder()
-    const readableStream = new ReadableStream({
-      async start(controller) {
-        for await (const chunk of response.stream) {
-          const chunkText = chunk.text()
-          controller.enqueue(encoder.encode(chunkText))
-        }
-        controller.close()
-      }
-    })
-
-    return new Response(readableStream, {
-      headers: { "Content-Type": "text/plain" }
-    })
+    return createDataStreamResponse(result)
   } catch (error: any) {
     let errorMessage = error.message || "An unexpected error occurred"
     const errorCode = error.status || 500

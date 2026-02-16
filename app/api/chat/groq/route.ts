@@ -1,16 +1,19 @@
 import { CHAT_SETTING_LIMITS } from "@/lib/chat-setting-limits"
 import { checkApiKey, getServerProfile } from "@/lib/server/server-chat-helpers"
 import { ChatSettings } from "@/types"
-import { OpenAIStream, StreamingTextResponse } from "ai"
-import OpenAI from "openai"
-import { logApiRequest } from "@/lib/logger"
+import { createOpenAI } from "@ai-sdk/openai"
+import { streamText } from "ai"
+import { createClient } from "@/lib/supabase/server"
+import { createDataStreamResponse } from "@/lib/stream-utils"
+import { cookies } from "next/headers"
 
 export const runtime = "edge"
 export async function POST(request: Request) {
   const json = await request.json()
-  const { chatSettings, messages } = json as {
+  const { chatSettings, messages, assistantMessageId } = json as {
     chatSettings: ChatSettings
     messages: any[]
+    assistantMessageId: string
   }
 
   try {
@@ -19,31 +22,33 @@ export async function POST(request: Request) {
     checkApiKey(profile.groq_api_key, "G")
 
     // Groq is compatible with the OpenAI SDK
-    const groq = new OpenAI({
+    const groq = createOpenAI({
       apiKey: profile.groq_api_key || "",
       baseURL: "https://api.groq.com/openai/v1"
     })
 
-    logApiRequest("Groq", {
-      model: chatSettings.model,
+    const result = await streamText({
+      model: groq(chatSettings.model),
       messages,
-      max_tokens:
-        CHAT_SETTING_LIMITS[chatSettings.model].MAX_TOKEN_OUTPUT_LENGTH
-    })
-
-    const response = await groq.chat.completions.create({
-      model: chatSettings.model,
-      messages,
-      max_tokens:
+      maxOutputTokens:
         CHAT_SETTING_LIMITS[chatSettings.model].MAX_TOKEN_OUTPUT_LENGTH,
-      stream: true
+      onFinish: async ({ usage }) => {
+        const { inputTokens, outputTokens } = usage
+        const cookieStore = cookies()
+        const supabaseServer = createClient(cookieStore)
+
+        await supabaseServer
+          .from("messages")
+          .update({
+            prompt_tokens: inputTokens,
+            completion_tokens: outputTokens,
+            total_tokens: (inputTokens || 0) + (outputTokens || 0)
+          })
+          .eq("id", assistantMessageId)
+      }
     })
 
-    // Convert the response into a friendly text-stream.
-    const stream = OpenAIStream(response)
-
-    // Respond with the stream
-    return new StreamingTextResponse(stream)
+    return createDataStreamResponse(result)
   } catch (error: any) {
     let errorMessage = error.message || "An unexpected error occurred"
     const errorCode = error.status || 500

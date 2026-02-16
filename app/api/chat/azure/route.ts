@@ -1,15 +1,26 @@
+import { CHAT_SETTING_LIMITS } from "@/lib/chat-setting-limits"
 import { checkApiKey, getServerProfile } from "@/lib/server/server-chat-helpers"
-import { ChatAPIPayload } from "@/types"
-import { OpenAIStream, StreamingTextResponse } from "ai"
-import OpenAI from "openai"
-import { ChatCompletionCreateParamsBase } from "openai/resources/chat/completions.mjs"
-import { logApiRequest } from "@/lib/logger"
+import { ChatSettings } from "@/types"
+import { createAzure } from "@ai-sdk/azure"
+import { streamText } from "ai"
+import { createClient } from "@/lib/supabase/server"
+import { createDataStreamResponse } from "@/lib/stream-utils"
+import { cookies } from "next/headers"
 
 export const runtime = "edge"
 
 export async function POST(request: Request) {
   const json = await request.json()
-  const { chatSettings, messages } = json as ChatAPIPayload
+  const { chatSettings, messages, assistantMessageId } = json as {
+    chatSettings: ChatSettings
+    messages: any[]
+    assistantMessageId: string
+  }
+
+  console.log("Azure route hit", {
+    model: chatSettings.model,
+    assistantMessageId
+  })
 
   try {
     const profile = await getServerProfile()
@@ -45,33 +56,54 @@ export async function POST(request: Request) {
       )
     }
 
-    const azureOpenai = new OpenAI({
+    const azure = createAzure({
       apiKey: KEY,
-      baseURL: `${ENDPOINT}/openai/deployments/${DEPLOYMENT_ID}`,
-      defaultQuery: { "api-version": "2023-12-01-preview" },
-      defaultHeaders: { "api-key": KEY }
+      resourceName: ENDPOINT.replace("https://", "").split(".")[0]
     })
 
-    logApiRequest("Azure OpenAI", {
-      model: chatSettings.model,
-      messages,
+    const sanitizedMessages = messages
+      .filter(m => m.content && String(m.content).trim() !== "")
+      .map(m => ({
+        role: m.role as "user" | "assistant" | "system",
+        content: m.content
+      }))
+
+    console.log(
+      "Sanitized Messages (Azure):",
+      JSON.stringify(sanitizedMessages, null, 2)
+    )
+
+    console.log("Calling streamText (Azure)...")
+    const result = await streamText({
+      model: azure(DEPLOYMENT_ID),
+      messages: sanitizedMessages,
       temperature: chatSettings.temperature,
-      deploymentId: DEPLOYMENT_ID
+      maxOutputTokens:
+        CHAT_SETTING_LIMITS[chatSettings.model]?.MAX_TOKEN_OUTPUT_LENGTH ||
+        4096,
+      onFinish: async ({ usage }) => {
+        console.log("streamText onFinish triggered (Azure)", { usage })
+        const { inputTokens, outputTokens } = usage
+        const cookieStore = cookies()
+        const supabaseServer = createClient(cookieStore)
+
+        await supabaseServer
+          .from("messages")
+          .update({
+            prompt_tokens: inputTokens,
+            completion_tokens: outputTokens,
+            total_tokens: (inputTokens || 0) + (outputTokens || 0)
+          })
+          .eq("id", assistantMessageId)
+      }
     })
 
-    const response = await azureOpenai.chat.completions.create({
-      model: DEPLOYMENT_ID as ChatCompletionCreateParamsBase["model"],
-      messages: messages as ChatCompletionCreateParamsBase["messages"],
-      temperature: chatSettings.temperature,
-      max_tokens: chatSettings.model === "gpt-4-vision-preview" ? 4096 : null, // TODO: Fix
-      stream: true
-    })
+    console.log("streamText result obtained (Azure), sending response...")
 
-    const stream = OpenAIStream(response)
-
-    return new StreamingTextResponse(stream)
+    return createDataStreamResponse(result)
   } catch (error: any) {
-    const errorMessage = error.error?.message || "An unexpected error occurred"
+    console.error("Azure Route Error:", error)
+    const errorMessage = error.message || "An unexpected error occurred"
     const errorCode = error.status || 500
     return new Response(JSON.stringify({ message: errorMessage }), {
       status: errorCode

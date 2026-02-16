@@ -715,39 +715,48 @@ export type Database = {
         Row: {
           assistant_id: string | null
           chat_id: string
+          completion_tokens: number | null
           content: string
           created_at: string
           id: string
           image_paths: string[]
           model: string
+          prompt_tokens: number | null
           role: string
           sequence_number: number
+          total_tokens: number | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
           assistant_id?: string | null
           chat_id: string
+          completion_tokens?: number | null
           content: string
           created_at?: string
           id?: string
           image_paths: string[]
           model: string
+          prompt_tokens?: number | null
           role: string
           sequence_number: number
+          total_tokens?: number | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
           assistant_id?: string | null
           chat_id?: string
+          completion_tokens?: number | null
           content?: string
           created_at?: string
           id?: string
           image_paths?: string[]
           model?: string
+          prompt_tokens?: number | null
           role?: string
           sequence_number?: number
+          total_tokens?: number | null
           updated_at?: string | null
           user_id?: string
         }

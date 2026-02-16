@@ -1,52 +1,80 @@
+import { CHAT_SETTING_LIMITS } from "@/lib/chat-setting-limits"
 import { checkApiKey, getServerProfile } from "@/lib/server/server-chat-helpers"
 import { ChatSettings } from "@/types"
-import { OpenAIStream, StreamingTextResponse } from "ai"
+import { createOpenAI } from "@ai-sdk/openai"
+import { streamText } from "ai"
 import { ServerRuntime } from "next"
-import OpenAI from "openai"
-import { ChatCompletionCreateParamsBase } from "openai/resources/chat/completions.mjs"
-import { logApiRequest } from "@/lib/logger"
+import { createClient } from "@/lib/supabase/server"
+import { createDataStreamResponse } from "@/lib/stream-utils"
+import { cookies } from "next/headers"
 
 export const runtime: ServerRuntime = "edge"
 
 export async function POST(request: Request) {
   const json = await request.json()
-  const { chatSettings, messages } = json as {
+  const { chatSettings, messages, assistantMessageId } = json as {
     chatSettings: ChatSettings
     messages: any[]
+    assistantMessageId: string
   }
+
+  console.log("OpenAI route hit", {
+    model: chatSettings.model,
+    assistantMessageId
+  })
 
   try {
     const profile = await getServerProfile()
 
     checkApiKey(profile.openai_api_key, "OpenAI")
 
-    const openai = new OpenAI({
+    const openai = createOpenAI({
       apiKey: profile.openai_api_key || "",
-      organization: profile.openai_organization_id
+      organization: profile.openai_organization_id || undefined
     })
 
-    logApiRequest("OpenAI", {
-      model: chatSettings.model,
-      messages,
-      temperature: chatSettings.temperature
-    })
+    const sanitizedMessages = messages
+      .filter(m => m.content && m.content.trim() !== "")
+      .map(m => ({
+        role: m.role as "user" | "assistant" | "system",
+        content: m.content
+      }))
 
-    const response = await openai.chat.completions.create({
-      model: chatSettings.model as ChatCompletionCreateParamsBase["model"],
-      messages: messages as ChatCompletionCreateParamsBase["messages"],
+    console.log(
+      "Sanitized Messages:",
+      JSON.stringify(sanitizedMessages, null, 2)
+    )
+
+    console.log("Calling streamText...")
+    const result = await streamText({
+      model: openai(chatSettings.model),
+      messages: sanitizedMessages,
       temperature: chatSettings.temperature,
-      max_tokens:
-        chatSettings.model === "gpt-4-vision-preview" ||
-        chatSettings.model === "gpt-4o"
-          ? 4096
-          : null, // TODO: Fix
-      stream: true
+      maxOutputTokens:
+        CHAT_SETTING_LIMITS[chatSettings.model]?.MAX_TOKEN_OUTPUT_LENGTH ||
+        4096,
+      onFinish: async ({ usage }) => {
+        console.log("streamText onFinish triggered", { usage })
+        const { inputTokens, outputTokens } = usage
+        const cookieStore = cookies()
+        const supabaseServer = createClient(cookieStore)
+
+        await supabaseServer
+          .from("messages")
+          .update({
+            prompt_tokens: inputTokens,
+            completion_tokens: outputTokens,
+            total_tokens: (inputTokens || 0) + (outputTokens || 0)
+          })
+          .eq("id", assistantMessageId)
+      }
     })
 
-    const stream = OpenAIStream(response)
+    console.log("streamText result obtained, sending response...")
 
-    return new StreamingTextResponse(stream)
+    return createDataStreamResponse(result)
   } catch (error: any) {
+    console.error("OpenAI Route Error:", error)
     let errorMessage = error.message || "An unexpected error occurred"
     const errorCode = error.status || 500
 

@@ -120,8 +120,15 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({}) => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
-    router.push("/login")
-    router.refresh()
+
+    // Manually clear Supabase cookies to ensure session destruction
+    document.cookie.split(";").forEach(c => {
+      document.cookie = c
+        .replace(/^ +/, "")
+        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/")
+    })
+
+    window.location.href = "/login"
     return
   }
 

@@ -1,16 +1,19 @@
 import { checkApiKey, getServerProfile } from "@/lib/server/server-chat-helpers"
 import { ChatSettings } from "@/types"
-import { OpenAIStream, StreamingTextResponse } from "ai"
-import OpenAI from "openai"
-import { logApiRequest } from "@/lib/logger"
+import { createOpenAI } from "@ai-sdk/openai"
+import { streamText } from "ai"
+import { createClient } from "@/lib/supabase/server"
+import { createDataStreamResponse } from "@/lib/stream-utils"
+import { cookies } from "next/headers"
 
 export const runtime = "edge"
 
 export async function POST(request: Request) {
   const json = await request.json()
-  const { chatSettings, messages } = json as {
+  const { chatSettings, messages, assistantMessageId } = json as {
     chatSettings: ChatSettings
     messages: any[]
+    assistantMessageId: string
   }
 
   try {
@@ -19,25 +22,31 @@ export async function POST(request: Request) {
     checkApiKey(profile.perplexity_api_key, "Perplexity")
 
     // Perplexity is compatible the OpenAI SDK
-    const perplexity = new OpenAI({
+    const perplexity = createOpenAI({
       apiKey: profile.perplexity_api_key || "",
       baseURL: "https://api.perplexity.ai/"
     })
 
-    logApiRequest("Perplexity", {
-      model: chatSettings.model,
-      messages
-    })
-
-    const response = await perplexity.chat.completions.create({
-      model: chatSettings.model,
+    const result = await streamText({
+      model: perplexity(chatSettings.model),
       messages,
-      stream: true
+      onFinish: async ({ usage }) => {
+        const { inputTokens, outputTokens } = usage
+        const cookieStore = cookies()
+        const supabaseServer = createClient(cookieStore)
+
+        await supabaseServer
+          .from("messages")
+          .update({
+            prompt_tokens: inputTokens,
+            completion_tokens: outputTokens,
+            total_tokens: (inputTokens || 0) + (outputTokens || 0)
+          })
+          .eq("id", assistantMessageId)
+      }
     })
 
-    const stream = OpenAIStream(response)
-
-    return new StreamingTextResponse(stream)
+    return createDataStreamResponse(result)
   } catch (error: any) {
     let errorMessage = error.message || "An unexpected error occurred"
     const errorCode = error.status || 500
