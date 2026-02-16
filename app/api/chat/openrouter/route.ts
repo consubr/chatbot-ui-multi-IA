@@ -55,12 +55,11 @@ export async function POST(request: Request) {
       messages: sanitizedMessages,
       temperature: chatSettings.temperature,
       maxOutputTokens:
-        CHAT_SETTING_LIMITS[chatSettings.model]?.MAX_TOKEN_OUTPUT_LENGTH ||
-        4096,
-      onFinish: async ({ usage }) => {
-        console.log("streamText onFinish triggered (OpenRouter)", { usage })
-        // Token tracking is now handled by the client via the Data Stream Protocol
-      }
+        CHAT_SETTING_LIMITS[chatSettings.model]?.MAX_TOKEN_OUTPUT_LENGTH || 4096
+      // onFinish: async ({ usage }) => {
+      //   console.log("streamText onFinish triggered (OpenRouter)", { usage })
+      //   // Token tracking is now handled by the client via the Data Stream Protocol
+      // }
     })
 
     console.log("streamText result obtained (OpenRouter), sending response...")

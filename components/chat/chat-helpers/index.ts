@@ -103,7 +103,8 @@ export const createTempMessages = (
       user_id: "",
       prompt_tokens: 0,
       completion_tokens: 0,
-      total_tokens: 0
+      total_tokens: 0,
+      usage: null
     },
     fileItems: []
   }
@@ -123,7 +124,8 @@ export const createTempMessages = (
       user_id: "",
       prompt_tokens: 0,
       completion_tokens: 0,
-      total_tokens: 0
+      total_tokens: 0,
+      usage: null
     },
     fileItems: []
   }
@@ -325,6 +327,7 @@ export const processResponse = async (
                 const data = JSON.parse(line.substring(2))
                 if (data.usage) {
                   usageData = {
+                    ...data.usage,
                     promptTokens:
                       data.usage.inputTokens || data.usage.promptTokens || 0,
                     completionTokens:
@@ -444,6 +447,7 @@ export const handleCreateMessages = async (
     promptTokens: number
     completionTokens: number
     totalTokens: number
+    [key: string]: any
   }
 ) => {
   console.log("handleCreateMessages called", {
@@ -480,6 +484,7 @@ export const handleCreateMessages = async (
     prompt_tokens: 0,
     completion_tokens: usage?.completionTokens || 0,
     total_tokens: usage?.totalTokens || 0,
+    usage: usage || null,
     id: assistantMessageId
   }
 
