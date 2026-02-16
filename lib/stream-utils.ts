@@ -27,6 +27,22 @@ export function createDataStreamResponse(
       } catch (error) {
         controller.error(error)
       } finally {
+        // After the stream is complete, we try to get the usage data
+        try {
+          // result.usage is a Promise that resolves when the stream finishes
+          const usage = await result.usage
+
+          // We send the usage data as a "Data" part (prefix "2:" or "d:")
+          // The client (use-chat-handler) will parse this to save token counts
+          // Format: 2: JSON\n
+
+          // Using "d:" attempting to follow Vercel AI SDK protocol for data
+          const dataChunk = `d:${JSON.stringify({ usage })}\n`
+          controller.enqueue(encoder.encode(dataChunk))
+        } catch (e) {
+          // Ignore if usage is not available
+        }
+
         controller.close()
       }
     }

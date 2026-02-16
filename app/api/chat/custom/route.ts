@@ -68,18 +68,7 @@ export async function POST(request: Request) {
         4096,
       onFinish: async ({ usage }) => {
         console.log("streamText onFinish triggered (Custom)", { usage })
-        const { inputTokens, outputTokens } = usage
-        const cookieStore = cookies()
-        const supabaseServer = createServerClient(cookieStore)
-
-        await supabaseServer
-          .from("messages")
-          .update({
-            prompt_tokens: inputTokens,
-            completion_tokens: outputTokens,
-            total_tokens: (inputTokens || 0) + (outputTokens || 0)
-          })
-          .eq("id", assistantMessageId)
+        // Token tracking is now handled by the client via the Data Stream Protocol
       }
     })
 

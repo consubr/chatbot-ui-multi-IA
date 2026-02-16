@@ -34,18 +34,7 @@ export async function POST(request: NextRequest) {
         CHAT_SETTING_LIMITS[chatSettings.model]?.MAX_TOKEN_OUTPUT_LENGTH ||
         4096,
       onFinish: async ({ usage }) => {
-        const { inputTokens, outputTokens } = usage
-        const cookieStore = cookies()
-        const supabaseServer = createClient(cookieStore)
-
-        await supabaseServer
-          .from("messages")
-          .update({
-            prompt_tokens: inputTokens,
-            completion_tokens: outputTokens,
-            total_tokens: (inputTokens || 0) + (outputTokens || 0)
-          })
-          .eq("id", assistantMessageId)
+        // Token tracking is now handled by the client via the Data Stream Protocol
       }
     })
 

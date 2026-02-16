@@ -271,6 +271,11 @@ export const useChatHandler = () => {
       }
 
       let generatedText = ""
+      let usageData: {
+        promptTokens: number
+        completionTokens: number
+        totalTokens: number
+      } | null = null
 
       if (selectedTools.length > 0) {
         setToolInUse("Tools")
@@ -295,7 +300,7 @@ export const useChatHandler = () => {
 
         setToolInUse("none")
 
-        generatedText = await processResponse(
+        const result = await processResponse(
           response,
           isRegeneration
             ? payload.chatMessages[payload.chatMessages.length - 1]
@@ -306,9 +311,17 @@ export const useChatHandler = () => {
           setChatMessages,
           setToolInUse
         )
+
+        // Handle result if it's an object, otherwise it's just text
+        if (typeof result === "object" && result !== null && "text" in result) {
+          generatedText = result.text
+          usageData = result.usage
+        } else {
+          generatedText = result as string
+        }
       } else {
         if (modelData!.provider === "ollama") {
-          generatedText = await handleLocalChat(
+          const result = await handleLocalChat(
             payload,
             profile!,
             chatSettings!,
@@ -320,8 +333,19 @@ export const useChatHandler = () => {
             setChatMessages,
             setToolInUse
           )
+
+          if (
+            typeof result === "object" &&
+            result !== null &&
+            "text" in result
+          ) {
+            generatedText = result.text
+            usageData = result.usage
+          } else {
+            generatedText = result as string
+          }
         } else {
-          generatedText = await handleHostedChat(
+          const result = await handleHostedChat(
             payload,
             profile!,
             modelData!,
@@ -335,6 +359,17 @@ export const useChatHandler = () => {
             setChatMessages,
             setToolInUse
           )
+
+          if (
+            typeof result === "object" &&
+            result !== null &&
+            "text" in result
+          ) {
+            generatedText = result.text
+            usageData = result.usage
+          } else {
+            generatedText = result as string
+          }
         }
       }
 
@@ -377,12 +412,17 @@ export const useChatHandler = () => {
         setChatMessages,
         setChatFileItems,
         setChatImages,
-        selectedAssistant
+        selectedAssistant,
+        isRegeneration
+          ? payload.chatMessages[payload.chatMessages.length - 1].message.id
+          : tempAssistantChatMessage.message.id,
+        usageData || undefined
       )
 
       setIsGenerating(false)
       setFirstTokenReceived(false)
     } catch (error) {
+      console.error("Error in handleSendMessage:", error)
       setIsGenerating(false)
       setFirstTokenReceived(false)
       setUserInput(startingInput)

@@ -301,6 +301,7 @@ export const processResponse = async (
 ) => {
   let fullText = ""
   let contentToAdd = ""
+  let usageData: any = null
 
   if (response.body) {
     await consumeReadableStream(
@@ -319,6 +320,20 @@ export const processResponse = async (
               if (line.startsWith("0:")) {
                 const text = JSON.parse(line.substring(2))
                 fullText += text
+              } else if (line.startsWith("d:")) {
+                // Handle Data chunk containing usage
+                const data = JSON.parse(line.substring(2))
+                if (data.usage) {
+                  usageData = {
+                    promptTokens:
+                      data.usage.inputTokens || data.usage.promptTokens || 0,
+                    completionTokens:
+                      data.usage.outputTokens ||
+                      data.usage.completionTokens ||
+                      0,
+                    totalTokens: data.usage.totalTokens || 0
+                  }
+                }
               }
             }
           } else {
@@ -339,7 +354,11 @@ export const processResponse = async (
               const updatedChatMessage: ChatMessage = {
                 message: {
                   ...chatMessage.message,
-                  content: fullText
+                  content: fullText,
+                  // Update token counts if usage data is received
+                  prompt_tokens: usageData?.promptTokens || 0,
+                  completion_tokens: usageData?.completionTokens || 0,
+                  total_tokens: usageData?.totalTokens || 0
                 },
                 fileItems: chatMessage.fileItems
               }
@@ -354,7 +373,10 @@ export const processResponse = async (
       controller.signal
     )
 
-    return fullText
+    return {
+      text: fullText,
+      usage: usageData
+    }
   } else {
     throw new Error("Response body is null")
   }
@@ -416,8 +438,21 @@ export const handleCreateMessages = async (
     React.SetStateAction<Tables<"file_items">[]>
   >,
   setChatImages: React.Dispatch<React.SetStateAction<MessageImage[]>>,
-  selectedAssistant: Tables<"assistants"> | null
+  selectedAssistant: Tables<"assistants"> | null,
+  assistantMessageId?: string,
+  usage?: {
+    promptTokens: number
+    completionTokens: number
+    totalTokens: number
+  }
 ) => {
+  console.log("handleCreateMessages called", {
+    messageContent,
+    assistantMessageId,
+    usage,
+    generatedTextLength: generatedText?.length
+  })
+
   const finalUserMessage: TablesInsert<"messages"> = {
     chat_id: currentChat.id,
     assistant_id: null,
@@ -427,9 +462,10 @@ export const handleCreateMessages = async (
     role: "user",
     sequence_number: chatMessages.length,
     image_paths: [],
-    prompt_tokens: 0,
-    completion_tokens: 0,
-    total_tokens: 0
+    prompt_tokens: usage?.promptTokens || 0,
+    completion_tokens: usage?.completionTokens || 0,
+    total_tokens: usage?.totalTokens || 0,
+    id: uuidv4()
   }
 
   const finalAssistantMessage: TablesInsert<"messages"> = {
@@ -441,9 +477,10 @@ export const handleCreateMessages = async (
     role: "assistant",
     sequence_number: chatMessages.length + 1,
     image_paths: [],
-    prompt_tokens: 0,
-    completion_tokens: 0,
-    total_tokens: 0
+    prompt_tokens: usage?.promptTokens || 0,
+    completion_tokens: usage?.completionTokens || 0,
+    total_tokens: usage?.totalTokens || 0,
+    id: assistantMessageId
   }
 
   let finalChatMessages: ChatMessage[] = []
