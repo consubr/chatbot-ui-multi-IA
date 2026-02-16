@@ -463,8 +463,8 @@ export const handleCreateMessages = async (
     sequence_number: chatMessages.length,
     image_paths: [],
     prompt_tokens: usage?.promptTokens || 0,
-    completion_tokens: usage?.completionTokens || 0,
-    total_tokens: usage?.totalTokens || 0,
+    completion_tokens: 0,
+    total_tokens: 0,
     id: uuidv4()
   }
 
@@ -477,7 +477,7 @@ export const handleCreateMessages = async (
     role: "assistant",
     sequence_number: chatMessages.length + 1,
     image_paths: [],
-    prompt_tokens: usage?.promptTokens || 0,
+    prompt_tokens: 0,
     completion_tokens: usage?.completionTokens || 0,
     total_tokens: usage?.totalTokens || 0,
     id: assistantMessageId
