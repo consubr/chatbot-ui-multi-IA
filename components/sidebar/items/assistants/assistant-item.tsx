@@ -1,4 +1,5 @@
 import { ChatSettingsForm } from "@/components/ui/chat-settings-form"
+import { Checkbox } from "@/components/ui/checkbox"
 import ImagePicker from "@/components/ui/image-picker"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -31,6 +32,9 @@ export const AssistantItem: FC<AssistantItemProps> = ({ assistant }) => {
     includeProfileContext: assistant.include_profile_context,
     includeWorkspaceInstructions: assistant.include_workspace_instructions
   })
+  const [sharing, setSharing] = useState<"private" | "public">(
+    assistant.sharing as "private" | "public"
+  )
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [imageLink, setImageLink] = useState("")
 
@@ -137,7 +141,8 @@ export const AssistantItem: FC<AssistantItemProps> = ({ assistant }) => {
         model: assistantChatSettings.model,
         image_path: assistant.image_path,
         prompt: assistantChatSettings.prompt,
-        temperature: assistantChatSettings.temperature
+        temperature: assistantChatSettings.temperature,
+        sharing
       }}
       renderInputs={(renderState: {
         startingAssistantFiles: Tables<"files">[]
@@ -206,6 +211,18 @@ export const AssistantItem: FC<AssistantItemProps> = ({ assistant }) => {
             onChangeChatSettings={setAssistantChatSettings}
             useAdvancedDropdown={true}
           />
+
+          <div className="space-y-1 pt-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                checked={sharing === "public"}
+                onCheckedChange={(checked: boolean) =>
+                  setSharing(checked ? "public" : "private")
+                }
+              />
+              <Label>Public Assistant</Label>
+            </div>
+          </div>
 
           <div className="space-y-1 pt-2">
             <Label>Files & Collections</Label>

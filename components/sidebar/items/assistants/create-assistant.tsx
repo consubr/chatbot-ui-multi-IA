@@ -1,5 +1,6 @@
 import { SidebarCreateItem } from "@/components/sidebar/items/all/sidebar-create-item"
 import { ChatSettingsForm } from "@/components/ui/chat-settings-form"
+import { Checkbox } from "@/components/ui/checkbox"
 import ImagePicker from "@/components/ui/image-picker"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -24,6 +25,7 @@ export const CreateAssistant: FC<CreateAssistantProps> = ({
   const [name, setName] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const [description, setDescription] = useState("")
+  const [sharing, setSharing] = useState<"private" | "public">("private")
   const [assistantChatSettings, setAssistantChatSettings] = useState({
     model: selectedWorkspace?.default_model,
     prompt: selectedWorkspace?.default_prompt,
@@ -128,7 +130,8 @@ export const CreateAssistant: FC<CreateAssistantProps> = ({
           collections: selectedAssistantRetrievalItems.filter(
             item => !item.hasOwnProperty("type")
           ) as Tables<"collections">[],
-          tools: selectedAssistantToolItems
+          tools: selectedAssistantToolItems,
+          sharing
         } as TablesInsert<"assistants">
       }
       isOpen={isOpen}
@@ -179,6 +182,18 @@ export const CreateAssistant: FC<CreateAssistantProps> = ({
             onChangeChatSettings={setAssistantChatSettings}
             useAdvancedDropdown={true}
           />
+
+          <div className="space-y-1 pt-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                checked={sharing === "public"}
+                onCheckedChange={(checked: boolean) =>
+                  setSharing(checked ? "public" : "private")
+                }
+              />
+              <Label>Public Assistant</Label>
+            </div>
+          </div>
 
           <div className="space-y-1 pt-2">
             <Label>Files & Collections</Label>
