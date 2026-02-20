@@ -997,6 +997,7 @@ export type Database = {
           openrouter_api_key: string | null
           perplexity_api_key: string | null
           profile_context: string
+          role: Database["public"]["Enums"]["user_role"]
           updated_at: string | null
           use_azure_openai: boolean
           user_id: string
@@ -1025,6 +1026,7 @@ export type Database = {
           openrouter_api_key?: string | null
           perplexity_api_key?: string | null
           profile_context: string
+          role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string | null
           use_azure_openai: boolean
           user_id: string
@@ -1053,6 +1055,7 @@ export type Database = {
           openrouter_api_key?: string | null
           perplexity_api_key?: string | null
           profile_context?: string
+          role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string | null
           use_azure_openai?: boolean
           user_id?: string
@@ -1361,7 +1364,14 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      user_role:
+        | "FREE"
+        | "PAID"
+        | "ADMIN"
+        | "SUPER_ADMIN"
+        | "PLAN1"
+        | "PLAN2"
+        | "PLAN3"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2025,7 +2035,17 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      user_role: [
+        "FREE",
+        "PAID",
+        "ADMIN",
+        "SUPER_ADMIN",
+        "PLAN1",
+        "PLAN2",
+        "PLAN3",
+      ],
+    },
   },
   storage: {
     Enums: {

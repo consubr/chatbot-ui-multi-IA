@@ -119,7 +119,8 @@ export async function buildFinalMessages(
     user_id: "",
     prompt_tokens: 0,
     completion_tokens: 0,
-    total_tokens: 0
+    total_tokens: 0,
+    usage: null
   }
 
   finalMessages.unshift(tempSystemMessage)

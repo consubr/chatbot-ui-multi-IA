@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js"
 import { createOpenAI } from "@ai-sdk/openai"
 import { streamText } from "ai"
 import { createClient as createServerClient } from "@/lib/supabase/server"
+import { createDataStreamResponse } from "@/lib/stream-utils"
 import { cookies } from "next/headers"
 
 export const runtime = "edge"
