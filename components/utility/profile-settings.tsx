@@ -350,6 +350,8 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({}) => {
               <div className="space-y-1">
                 <div className="flex items-center space-x-2">
                   <Label>Username</Label>
+                  <Label> - Role: </Label>
+                  <Label> {profile.role || ""}</Label>
 
                   <div className="text-xs">
                     {username !== profile.username ? (
