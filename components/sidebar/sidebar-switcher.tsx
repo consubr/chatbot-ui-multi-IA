@@ -1,5 +1,5 @@
 import { ContentType } from "@/types"
-import { UserRole } from "@/types/user-role"
+import { checkIsAdmin } from "@/types/user-role"
 import {
   IconAdjustmentsHorizontal,
   IconBolt,
@@ -27,8 +27,7 @@ export const SidebarSwitcher: FC<SidebarSwitcherProps> = ({
   onContentTypeChange
 }) => {
   const { profile } = useContext(ChatbotUIContext)
-  const isAdmin =
-    profile?.role === UserRole.ADMIN || profile?.role === UserRole.SUPER_ADMIN
+  const isAdmin = checkIsAdmin(profile?.role)
 
   return (
     <div className="flex flex-col justify-between border-r-2 pb-5">

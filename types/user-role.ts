@@ -7,3 +7,7 @@ export enum UserRole {
   PLAN2 = "PLAN2",
   PLAN3 = "PLAN3"
 }
+
+export const checkIsAdmin = (role?: string | null): boolean => {
+  return role === UserRole.ADMIN || role === UserRole.SUPER_ADMIN
+}

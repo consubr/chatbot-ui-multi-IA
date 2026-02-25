@@ -7,6 +7,7 @@ import { TabsContent } from "../ui/tabs"
 import { WorkspaceSwitcher } from "../utility/workspace-switcher"
 import { WorkspaceSettings } from "../workspace/workspace-settings"
 import { SidebarContent } from "./sidebar-content"
+import { checkIsAdmin } from "@/types/user-role"
 
 interface SidebarProps {
   contentType: ContentType
@@ -54,6 +55,8 @@ export const Sidebar: FC<SidebarProps> = ({ contentType, showSidebar }) => {
     )
   }
 
+  const isAdmin = checkIsAdmin(profile?.role)
+
   return (
     <TabsContent
       className="m-0 w-full space-y-2"
@@ -67,9 +70,9 @@ export const Sidebar: FC<SidebarProps> = ({ contentType, showSidebar }) => {
     >
       <div className="flex h-full flex-col p-3">
         <div className="flex items-center border-b-2 pb-2">
-          <WorkspaceSwitcher />
+          {isAdmin && <WorkspaceSwitcher />}
 
-          <WorkspaceSettings />
+          {isAdmin && <WorkspaceSettings />}
         </div>
 
         {(() => {

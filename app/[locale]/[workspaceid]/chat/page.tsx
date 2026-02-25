@@ -9,6 +9,7 @@ import { QuickSettings } from "@/components/chat/quick-settings"
 import { Brand } from "@/components/ui/brand"
 import { ChatbotUIContext } from "@/context/context"
 import useHotkey from "@/lib/hooks/use-hotkey"
+import { checkIsAdmin } from "@/types/user-role"
 import { useTheme } from "next-themes"
 import { useContext } from "react"
 
@@ -18,11 +19,13 @@ export default function ChatPage() {
     handleFocusChatInput()
   })
 
-  const { chatMessages } = useContext(ChatbotUIContext)
+  const { chatMessages, profile } = useContext(ChatbotUIContext)
 
   const { handleNewChat, handleFocusChatInput } = useChatHandler()
 
   const { theme } = useTheme()
+
+  const isAdmin = checkIsAdmin(profile?.role)
 
   return (
     <>
@@ -37,7 +40,7 @@ export default function ChatPage() {
           </div>
 
           <div className="absolute right-2 top-2">
-            <ChatSettings />
+            {isAdmin && <ChatSettings />}
           </div>
 
           <div className="flex grow flex-col items-center justify-center" />
