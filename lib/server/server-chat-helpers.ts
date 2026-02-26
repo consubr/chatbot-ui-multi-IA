@@ -1,21 +1,43 @@
 import { Database, Tables } from "@/supabase/types"
 import { VALID_ENV_KEYS } from "@/types/valid-keys"
 import { createServerClient } from "@supabase/ssr"
-import { cookies } from "next/headers"
+import { createClient } from "@supabase/supabase-js"
+import { cookies, headers } from "next/headers"
 
 export async function getServerProfile() {
   const cookieStore = cookies()
-  const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
+  const headersList = headers()
+  const authHeader = headersList.get("authorization")
+
+  let supabase
+
+  if (authHeader) {
+    // If an Authorization header is present (e.g. from Flutter), use it
+    supabase = createClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: authHeader
+          }
         }
       }
-    }
-  )
+    )
+  } else {
+    // Fallback to web cookies for standard browser sessions
+    supabase = createServerClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          }
+        }
+      }
+    )
+  }
 
   const user = (await supabase.auth.getUser()).data.user
   if (!user) {
