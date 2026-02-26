@@ -18,6 +18,7 @@ import { ChatInput } from "./chat-input"
 import { ChatMessages } from "./chat-messages"
 import { ChatScrollButtons } from "./chat-scroll-buttons"
 import { ChatSecondaryButtons } from "./chat-secondary-buttons"
+import { checkIsAdmin } from "@/types/user-role"
 
 interface ChatUIProps {}
 
@@ -38,7 +39,8 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     setChatFiles,
     setShowFilesDisplay,
     setUseRetrieval,
-    setSelectedTools
+    setSelectedTools,
+    profile
   } = useContext(ChatbotUIContext)
 
   const { handleNewChat, handleFocusChatInput } = useChatHandler()
@@ -185,6 +187,8 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     return <Loading />
   }
 
+  const isAdmin = checkIsAdmin(profile?.role)
+
   return (
     <div className="relative flex h-full flex-col items-center">
       <div className="absolute left-4 top-2.5 flex justify-center">
@@ -223,7 +227,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       </div>
 
       <div className="absolute bottom-2 right-2 hidden md:block lg:bottom-4 lg:right-4">
-        <ChatHelp />
+        {isAdmin && <ChatHelp />}
       </div>
     </div>
   )

@@ -50,7 +50,7 @@ export default function ChatPage() {
           </div>
 
           <div className="absolute bottom-2 right-2 hidden md:block lg:bottom-4 lg:right-4">
-            <ChatHelp />
+            {isAdmin && <ChatHelp />}
           </div>
         </div>
       ) : (

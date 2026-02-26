@@ -20,6 +20,7 @@ import { useChatHandler } from "./chat-hooks/use-chat-handler"
 import { useChatHistoryHandler } from "./chat-hooks/use-chat-history"
 import { usePromptAndCommand } from "./chat-hooks/use-prompt-and-command"
 import { useSelectFileHandler } from "./chat-hooks/use-select-file-handler"
+import { checkIsAdmin } from "@/types/user-role"
 
 interface ChatInputProps {}
 
@@ -54,7 +55,8 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
     chatSettings,
     selectedTools,
     setSelectedTools,
-    assistantImages
+    assistantImages,
+    profile
   } = useContext(ChatbotUIContext)
 
   const {
@@ -162,6 +164,8 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
     }
   }
 
+  const isAdmin = checkIsAdmin(profile?.role)
+
   return (
     <>
       <div className="flex flex-col flex-wrap justify-center gap-2">
@@ -217,11 +221,13 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
         </div>
 
         <>
-          <IconCirclePlus
-            className="absolute bottom-[12px] left-3 cursor-pointer p-1 hover:opacity-50"
-            size={32}
-            onClick={() => fileInputRef.current?.click()}
-          />
+          {isAdmin && (
+            <IconCirclePlus
+              className="absolute bottom-[12px] left-3 cursor-pointer p-1 hover:opacity-50"
+              size={32}
+              onClick={() => fileInputRef.current?.click()}
+            />
+          )}
 
           {/* Hidden input to select files from device */}
           <Input
