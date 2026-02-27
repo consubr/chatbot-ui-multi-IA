@@ -92,12 +92,75 @@
 
     --ring: 0 0% 14.9%;
   }
+
+  .yana-light {
+    --background: 27 63% 97%;
+    --foreground: 22 25% 19%;
+
+    --muted: 27 35% 93%;
+    --muted-foreground: 27 18% 55%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 22 25% 19%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 22 25% 19%;
+
+    --border: 27 20% 88%;
+    --input: 27 20% 88%;
+
+    --primary: 17 83% 66%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 25 80% 89%;
+    --secondary-foreground: 22 25% 19%;
+
+    --accent: 25 80% 89%;
+    --accent-foreground: 22 25% 19%;
+
+    --destructive: 0 71% 66%;
+    --destructive-foreground: 0 0% 100%;
+
+    --ring: 17 83% 66%;
+  }
+
+  .yana-dark {
+    --background: 22 26% 12%;
+    --foreground: 27 63% 97%;
+
+    --muted: 22 26% 18%;
+    --muted-foreground: 27 18% 65%;
+
+    --popover: 22 26% 12%;
+    --popover-foreground: 27 63% 97%;
+
+    --card: 22 26% 12%;
+    --card-foreground: 27 63% 97%;
+
+    --border: 22 26% 22%;
+    --input: 22 26% 22%;
+
+    --primary: 18 80% 64%;
+    --primary-foreground: 22 26% 12%;
+
+    --secondary: 22 26% 18%;
+    --secondary-foreground: 27 63% 97%;
+
+    --accent: 22 26% 18%;
+    --accent-foreground: 27 63% 97%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 85.7% 97.3%;
+
+    --ring: 22 26% 22%;
+  }
 }
 
 @layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }

@@ -8,6 +8,7 @@ import { ChatSettings } from "@/components/chat/chat-settings"
 import { ChatUI } from "@/components/chat/chat-ui"
 import { QuickSettings } from "@/components/chat/quick-settings"
 import { Brand } from "@/components/ui/brand"
+import { ThemeSwitcher } from "@/components/utility/theme-switcher"
 import { ChatbotUIContext } from "@/context/context"
 import useHotkey from "@/lib/hooks/use-hotkey"
 import { checkIsAdmin } from "@/types/user-role"
@@ -36,8 +37,9 @@ export default function ChatPage() {
             <Brand theme={theme === "dark" ? "dark" : "light"} />
           </div>
 
-          <div className="absolute left-2 top-2">
+          <div className="absolute left-2 top-2 flex items-center space-x-6">
             <QuickSettings />
+            <ThemeSwitcher />
           </div>
 
           <div className="absolute right-2 top-2 flex items-center space-x-2">
