@@ -3,6 +3,7 @@
 import { ChatHelp } from "@/components/chat/chat-help"
 import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
 import { ChatInput } from "@/components/chat/chat-input"
+import { ChatSecondaryButtons } from "@/components/chat/chat-secondary-buttons"
 import { ChatSettings } from "@/components/chat/chat-settings"
 import { ChatUI } from "@/components/chat/chat-ui"
 import { QuickSettings } from "@/components/chat/quick-settings"
@@ -39,7 +40,8 @@ export default function ChatPage() {
             <QuickSettings />
           </div>
 
-          <div className="absolute right-2 top-2">
+          <div className="absolute right-2 top-2 flex items-center space-x-2">
+            <ChatSecondaryButtons />
             {isAdmin && <ChatSettings />}
           </div>
 

@@ -11,6 +11,8 @@ import { ChatMessage, ChatPayload, LLMID, ModelProvider } from "@/types"
 import { useRouter } from "next/navigation"
 import { useContext, useEffect, useRef } from "react"
 import { LLM_LIST } from "../../../lib/models/llm/llm-list"
+import { toast } from "sonner"
+import { getProfileByUserId } from "@/db/profile"
 import {
   createTempMessages,
   handleCreateChat,
@@ -31,6 +33,7 @@ export const useChatHandler = () => {
     setUserInput,
     setNewMessageImages,
     profile,
+    setProfile,
     setIsGenerating,
     setChatMessages,
     setFirstTokenReceived,
@@ -227,6 +230,16 @@ export const useChatHandler = () => {
         messageContent
       )
 
+      if (profile?.credits !== null && profile!.credits <= 0) {
+        toast.error(
+          "Créditos insuficientes. Por favor, adicione mais tokens para continuar."
+        )
+        setIsGenerating(false)
+        setFirstTokenReceived(false)
+        setUserInput(startingInput)
+        return
+      }
+
       let currentChat = selectedChat ? { ...selectedChat } : null
 
       const b64Images = newMessageImages.map(image => image.base64)
@@ -418,6 +431,13 @@ export const useChatHandler = () => {
           : tempAssistantChatMessage.message.id,
         usageData || undefined
       )
+
+      if (profile) {
+        const updatedProfile = await getProfileByUserId(profile.user_id)
+        if (updatedProfile) {
+          setProfile(updatedProfile)
+        }
+      }
 
       setIsGenerating(false)
       setFirstTokenReceived(false)

@@ -1,6 +1,6 @@
 import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
 import { ChatbotUIContext } from "@/context/context"
-import { IconInfoCircle, IconMessagePlus } from "@tabler/icons-react"
+import { IconCoin, IconInfoCircle, IconMessagePlus } from "@tabler/icons-react"
 import { FC, useContext } from "react"
 import { WithTooltip } from "../ui/with-tooltip"
 import { checkIsAdmin } from "@/types/user-role"
@@ -14,8 +14,26 @@ export const ChatSecondaryButtons: FC<ChatSecondaryButtonsProps> = ({}) => {
 
   const isAdmin = checkIsAdmin(profile?.role)
 
+  const credits = profile?.credits || 0
+  const hasCredits = credits > 0
+
   return (
     <>
+      <WithTooltip
+        delayDuration={200}
+        display={<div>Créditos (Tokens)</div>}
+        trigger={
+          <div
+            className={`mt-1 flex cursor-default items-center space-x-1 text-sm transition-colors hover:opacity-80 ${
+              hasCredits ? "text-green-500" : "text-red-500"
+            }`}
+          >
+            <IconCoin size={20} />
+            <span className="font-bold">{credits.toLocaleString()}</span>
+          </div>
+        }
+      />
+
       {selectedChat && (
         <>
           {isAdmin && (

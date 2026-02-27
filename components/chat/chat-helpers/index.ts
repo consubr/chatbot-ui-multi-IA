@@ -3,7 +3,7 @@
 import { createChatFiles } from "@/db/chat-files"
 import { createChat } from "@/db/chats"
 import { createMessageFileItems } from "@/db/message-file-items"
-import { createMessages, updateMessage } from "@/db/messages"
+import { createMessages, updateMessage, deleteMessage } from "@/db/messages"
 import { uploadMessageImage } from "@/db/storage/message-images"
 import {
   buildFinalMessages,
@@ -493,12 +493,16 @@ export const handleCreateMessages = async (
   if (isRegeneration) {
     const lastStartingMessage = chatMessages[chatMessages.length - 1].message
 
-    const updatedMessage = await updateMessage(lastStartingMessage.id, {
-      ...lastStartingMessage,
-      content: generatedText
-    })
+    // Delete the old assistant message from the DB to trigger a new insert
+    // This allows the token tracking trigger to fire correctly and charge credits.
+    await deleteMessage(lastStartingMessage.id)
 
-    chatMessages[chatMessages.length - 1].message = updatedMessage
+    // Ensure the new assistant message retains the same ID so order is preserved
+    finalAssistantMessage.id = lastStartingMessage.id
+
+    const createdMessages = await createMessages([finalAssistantMessage])
+
+    chatMessages[chatMessages.length - 1].message = createdMessages[0]
 
     finalChatMessages = [...chatMessages]
 
