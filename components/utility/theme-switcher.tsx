@@ -15,17 +15,23 @@ export const ThemeSwitcher: FC<ThemeSwitcherProps> = () => {
   const { setTheme, theme } = useTheme()
 
   const handleChange = (
-    newTheme: "light" | "dark" | "yana-light" | "yana-dark"
+    newTheme: "light" | "dark" | "yana-light" | "yana-dark" | "yana-sepia"
   ) => {
     localStorage.setItem("theme", newTheme)
     setTheme(newTheme)
   }
 
-  const getNextTheme = (): "light" | "dark" | "yana-light" | "yana-dark" => {
+  const getNextTheme = ():
+    | "light"
+    | "dark"
+    | "yana-light"
+    | "yana-dark"
+    | "yana-sepia" => {
     if (theme === "light") return "dark"
     if (theme === "dark") return "yana-light"
     if (theme === "yana-light") return "yana-dark"
-    if (theme === "yana-dark") return "light"
+    if (theme === "yana-dark") return "yana-sepia"
+    if (theme === "yana-sepia") return "light"
     return "yana-light"
   }
 
@@ -37,6 +43,8 @@ export const ThemeSwitcher: FC<ThemeSwitcherProps> = () => {
         return <IconMoon size={SIDEBAR_ICON_SIZE} className="text-[#E87A4F]" />
       case "yana-light":
         return <IconSun size={SIDEBAR_ICON_SIZE} className="text-[#E87A4F]" />
+      case "yana-sepia":
+        return <IconSun size={SIDEBAR_ICON_SIZE} className="text-[#A05C3A]" /> // A browner/terracota tint for the icon
       default:
         return <IconSun size={SIDEBAR_ICON_SIZE} />
     }
