@@ -21,6 +21,7 @@ import { deleteTool } from "@/db/tools"
 import { Tables } from "@/supabase/types"
 import { ContentType, DataItemType } from "@/types"
 import { FC, useContext, useRef, useState } from "react"
+import { checkIsSuperAdmin } from "@/types/user-role"
 
 interface SidebarDeleteItemProps {
   item: DataItemType
@@ -39,7 +40,8 @@ export const SidebarDeleteItem: FC<SidebarDeleteItemProps> = ({
     setCollections,
     setAssistants,
     setTools,
-    setModels
+    setModels,
+    profile
   } = useContext(ChatbotUIContext)
 
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -48,7 +50,8 @@ export const SidebarDeleteItem: FC<SidebarDeleteItemProps> = ({
 
   const deleteFunctions = {
     chats: async (chat: Tables<"chats">) => {
-      await deleteChat(chat.id)
+      const isSuperAdmin = checkIsSuperAdmin(profile?.role)
+      await deleteChat(chat.id, isSuperAdmin)
     },
     presets: async (preset: Tables<"presets">) => {
       await deletePreset(preset.id)

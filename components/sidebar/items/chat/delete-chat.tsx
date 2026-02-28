@@ -15,6 +15,7 @@ import useHotkey from "@/lib/hooks/use-hotkey"
 import { Tables } from "@/supabase/types"
 import { IconTrash } from "@tabler/icons-react"
 import { FC, useContext, useRef, useState } from "react"
+import { checkIsSuperAdmin } from "@/types/user-role"
 
 interface DeleteChatProps {
   chat: Tables<"chats">
@@ -23,7 +24,7 @@ interface DeleteChatProps {
 export const DeleteChat: FC<DeleteChatProps> = ({ chat }) => {
   useHotkey("Backspace", () => setShowChatDialog(true))
 
-  const { setChats } = useContext(ChatbotUIContext)
+  const { setChats, profile } = useContext(ChatbotUIContext)
   const { handleNewChat } = useChatHandler()
 
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -31,7 +32,8 @@ export const DeleteChat: FC<DeleteChatProps> = ({ chat }) => {
   const [showChatDialog, setShowChatDialog] = useState(false)
 
   const handleDeleteChat = async () => {
-    await deleteChat(chat.id)
+    const isSuperAdmin = checkIsSuperAdmin(profile?.role)
+    await deleteChat(chat.id, isSuperAdmin)
 
     setChats(prevState => prevState.filter(c => c.id !== chat.id))
 

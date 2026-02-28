@@ -11,15 +11,24 @@ export const getChatById = async (chatId: string) => {
   return chat
 }
 
-export const getChatsByWorkspaceId = async (workspaceId: string) => {
-  const { data: chats, error } = await supabase
+export const getChatsByWorkspaceId = async (
+  workspaceId: string,
+  isSuperAdmin: boolean = false
+) => {
+  let query = supabase
     .from("chats")
     .select("*")
     .eq("workspace_id", workspaceId)
     .order("created_at", { ascending: false })
 
+  if (!isSuperAdmin) {
+    query = query.is("status", null) //exclui os chats deletados
+  }
+
+  const { data: chats, error } = await query
+
   if (!chats) {
-    throw new Error(error.message)
+    throw new Error(error?.message || "Failed to fetch chats")
   }
 
   return chats
@@ -70,11 +79,25 @@ export const updateChat = async (
   return updatedChat
 }
 
-export const deleteChat = async (chatId: string) => {
-  const { error } = await supabase.from("chats").delete().eq("id", chatId)
+export const deleteChat = async (
+  chatId: string,
+  isSuperAdmin: boolean = false
+) => {
+  if (isSuperAdmin) {
+    const { error } = await supabase.from("chats").delete().eq("id", chatId)
 
-  if (error) {
-    throw new Error(error.message)
+    if (error) {
+      throw new Error(error.message)
+    }
+  } else {
+    const { error } = await supabase
+      .from("chats")
+      .update({ status: "DELETED" })
+      .eq("id", chatId)
+
+    if (error) {
+      throw new Error(error.message)
+    }
   }
 
   return true

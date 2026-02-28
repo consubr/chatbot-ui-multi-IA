@@ -21,6 +21,7 @@ import { supabase } from "@/lib/supabase/browser-client"
 import { LLMID } from "@/types"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { ReactNode, useContext, useEffect, useState } from "react"
+import { checkIsSuperAdmin } from "@/types/user-role"
 import Loading from "../loading"
 
 interface WorkspaceLayoutProps {
@@ -57,7 +58,8 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
     setChatImages,
     setNewMessageFiles,
     setNewMessageImages,
-    setShowFilesDisplay
+    setShowFilesDisplay,
+    profile
   } = useContext(ChatbotUIContext)
 
   const [loading, setLoading] = useState(true)
@@ -69,13 +71,18 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
       if (!session) {
         return router.push("/login")
       } else {
-        await fetchWorkspaceData(workspaceId)
+        await fetchWorkspaceData(workspaceId, session.user.id)
       }
     })()
   }, [])
 
   useEffect(() => {
-    ;(async () => await fetchWorkspaceData(workspaceId))()
+    ;(async () => {
+      const session = (await supabase.auth.getSession()).data.session
+      if (session) {
+        await fetchWorkspaceData(workspaceId, session.user.id)
+      }
+    })()
 
     setUserInput("")
     setChatMessages([])
@@ -91,11 +98,19 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
     setShowFilesDisplay(false)
   }, [workspaceId])
 
-  const fetchWorkspaceData = async (workspaceId: string) => {
+  const fetchWorkspaceData = async (workspaceId: string, userId: string) => {
     setLoading(true)
 
     const workspace = await getWorkspaceById(workspaceId)
     setSelectedWorkspace(workspace)
+
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("user_id", userId)
+      .single()
+
+    const isSuperAdmin = checkIsSuperAdmin(profileData?.role)
 
     const assistantData = await getAssistantWorkspacesByWorkspaceId(workspaceId)
     const publicAssistants = await getPublicAssistants()
@@ -144,7 +159,8 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
       }
     }
 
-    const chats = await getChatsByWorkspaceId(workspaceId)
+    const chats = await getChatsByWorkspaceId(workspaceId, isSuperAdmin)
+
     setChats(chats)
 
     const collectionData =
