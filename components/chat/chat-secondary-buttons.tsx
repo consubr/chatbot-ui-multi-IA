@@ -24,7 +24,7 @@ export const ChatSecondaryButtons: FC<ChatSecondaryButtonsProps> = ({}) => {
         display={<div>Créditos (Tokens)</div>}
         trigger={
           <div
-            className={`mt-1 flex cursor-default items-center space-x-1 text-sm transition-colors hover:opacity-80 ${
+            className={`mr-4 mt-1 flex cursor-default items-center space-x-1 text-sm transition-colors hover:opacity-80 ${
               hasCredits ? "text-green-500" : "text-red-500"
             }`}
           >
