@@ -47,7 +47,7 @@ export const ThemeSwitcher: FC<ThemeSwitcherProps> = () => {
           className="flex cursor-pointer space-x-2"
           variant="ghost"
           size="icon"
-          title={`Current theme: ${theme || "yana-light"}`}
+          title={`Current theme: ${theme || "yana-clay-light"}`}
         >
           {getThemeIcon()}
         </Button>

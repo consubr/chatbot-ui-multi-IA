@@ -1,5 +1,5 @@
 -- Add credits column to profiles if it doesn't exist
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS credits INT DEFAULT 0;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS credits INT DEFAULT 25000;
 
 -- Function to deduct credits when a message is inserted
 CREATE OR REPLACE FUNCTION deduct_credits_on_message()

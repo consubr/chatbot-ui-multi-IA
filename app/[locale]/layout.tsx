@@ -92,7 +92,7 @@ export default async function RootLayout({
       <body className={inter.className}>
         <Providers
           attribute="class"
-          defaultTheme="yana-light"
+          defaultTheme="yana-clay-light"
           themes={[
             "light",
             "dark",
