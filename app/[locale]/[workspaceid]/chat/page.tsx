@@ -12,6 +12,7 @@ import { ThemeSwitcher } from "@/components/utility/theme-switcher"
 import { ChatbotUIContext } from "@/context/context"
 import useHotkey from "@/lib/hooks/use-hotkey"
 import { checkIsAdmin } from "@/types/user-role"
+import { IconMenu2 } from "@tabler/icons-react"
 import { useTheme } from "next-themes"
 import { useContext } from "react"
 
@@ -21,7 +22,8 @@ export default function ChatPage() {
     handleFocusChatInput()
   })
 
-  const { chatMessages, profile } = useContext(ChatbotUIContext)
+  const { chatMessages, profile, showSidebar, setShowSidebar } =
+    useContext(ChatbotUIContext)
 
   const { handleNewChat, handleFocusChatInput } = useChatHandler()
 
@@ -37,7 +39,17 @@ export default function ChatPage() {
             <Brand theme={theme === "dark" ? "dark" : "light"} />
           </div>
 
-          <div className="absolute left-2 top-2 flex items-center space-x-6">
+          <div className="absolute left-2 top-2 flex items-center">
+            {!showSidebar && (
+              <IconMenu2
+                className="text-muted-foreground cursor-pointer hover:opacity-50"
+                size={24}
+                onClick={() => {
+                  setShowSidebar(true)
+                  localStorage.setItem("showSidebar", "true")
+                }}
+              />
+            )}
             <QuickSettings />
             <ThemeSwitcher />
           </div>

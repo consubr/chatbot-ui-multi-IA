@@ -115,6 +115,14 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   const [newMessageImages, setNewMessageImages] = useState<MessageImage[]>([])
   const [showFilesDisplay, setShowFilesDisplay] = useState<boolean>(false)
 
+  // UI STORE
+  const [showSidebar, setShowSidebar] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("showSidebar") === "true"
+    }
+    return false
+  })
+
   // RETIEVAL STORE
   const [useRetrieval, setUseRetrieval] = useState<boolean>(true)
   const [sourceCount, setSourceCount] = useState<number>(4)
@@ -322,7 +330,11 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         selectedTools,
         setSelectedTools,
         toolInUse,
-        setToolInUse
+        setToolInUse,
+
+        // UI STORE
+        showSidebar,
+        setShowSidebar
       }}
     >
       {children}

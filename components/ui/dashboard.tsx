@@ -12,6 +12,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { FC, useState } from "react"
 import { useSelectFileHandler } from "../chat/chat-hooks/use-select-file-handler"
 import { CommandK } from "../utility/command-k"
+import { ChatbotUIContext } from "@/context/context"
+import { useContext } from "react"
 
 export const SIDEBAR_WIDTH = 350
 
@@ -29,11 +31,10 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
 
   const { handleSelectDeviceFile } = useSelectFileHandler()
 
+  const { showSidebar, setShowSidebar } = useContext(ChatbotUIContext)
+
   const [contentType, setContentType] = useState<ContentType>(
     tabValue as ContentType
-  )
-  const [showSidebar, setShowSidebar] = useState(
-    localStorage.getItem("showSidebar") === "true"
   )
   const [isDragging, setIsDragging] = useState(false)
 
