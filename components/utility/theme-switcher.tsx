@@ -33,6 +33,12 @@ export const ThemeSwitcher: FC<ThemeSwitcherProps> = () => {
       case "yana-neutral-light":
       case "yana-sage-light":
         return <IconSun size={SIDEBAR_ICON_SIZE} className="text-[#E87A4F]" />
+      case "liven-dark":
+      case "liven-dark2":
+        return <IconMoon size={SIDEBAR_ICON_SIZE} className="text-[#388A5A]" />
+      case "liven-light":
+      case "liven-light2":
+        return <IconSun size={SIDEBAR_ICON_SIZE} className="text-[#388A5A]" />
       case "yana-sepia":
         return <IconSun size={SIDEBAR_ICON_SIZE} className="text-[#A05C3A]" /> // A browner/terracota tint for the icon
       default:
@@ -85,6 +91,18 @@ export const ThemeSwitcher: FC<ThemeSwitcherProps> = () => {
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleChange("yana-sage-dark")}>
           <IconMoon size={16} className="mr-2 text-[#E87A4F]" /> Sage Dark
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleChange("liven-light")}>
+          <IconSun size={16} className="mr-2 text-[#388A5A]" /> Liven Light
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleChange("liven-dark")}>
+          <IconMoon size={16} className="mr-2 text-[#388A5A]" /> Liven Dark
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleChange("liven-light2")}>
+          <IconSun size={16} className="mr-2 text-[#388A5A]" /> Liven Light 2
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleChange("liven-dark2")}>
+          <IconMoon size={16} className="mr-2 text-[#388A5A]" /> Liven Dark 2
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

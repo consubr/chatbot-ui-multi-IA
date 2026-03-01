@@ -388,6 +388,149 @@
 
     --ring: 120 10% 32%;
   }
+
+  /* Liven App Themes (Option A: Liven Fiel) */
+  .liven-light {
+    --background: 45 33% 95%;
+    /* Fundo off-white creme nutritivo */
+    --foreground: 145 20% 20%;
+    /* Texto cinza/verde escuro */
+
+    --muted: 45 25% 90%;
+    --muted-foreground: 145 15% 45%;
+
+    --popover: 45 33% 95%;
+    --popover-foreground: 145 20% 20%;
+
+    --card: 0 0% 100%;
+    /* Cards brancos para profundidade no creme */
+    --card-foreground: 145 20% 20%;
+
+    --border: 45 20% 88%;
+    --input: 45 20% 88%;
+
+    --primary: 145 42% 38%;
+    /* Verde principal Liven */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 145 20% 90%;
+    --secondary-foreground: 145 20% 20%;
+
+    --accent: 145 20% 90%;
+    --accent-foreground: 145 20% 20%;
+
+    --destructive: 0 71% 66%;
+    --destructive-foreground: 0 0% 100%;
+
+    --ring: 145 42% 38%;
+  }
+
+  .liven-dark {
+    --background: 145 30% 12%;
+    /* Fundo "floresta noturna" */
+    --foreground: 45 33% 90%;
+    /* Texto creme suave */
+
+    --muted: 145 25% 18%;
+    --muted-foreground: 45 20% 65%;
+
+    --popover: 145 30% 12%;
+    --popover-foreground: 45 33% 90%;
+
+    --card: 145 25% 15%;
+    /* Cards levemente mais claros que o fundo */
+    --card-foreground: 45 33% 90%;
+
+    --border: 145 25% 22%;
+    --input: 145 25% 22%;
+
+    --primary: 145 42% 48%;
+    /* Verde principal mais vibrante para dark mode */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 145 25% 18%;
+    --secondary-foreground: 45 33% 90%;
+
+    --accent: 145 25% 18%;
+    --accent-foreground: 45 33% 90%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 85.7% 97.3%;
+
+    --ring: 145 25% 22%;
+  }
+
+  /* Liven App Themes (Option B: Monocromático de Sálvia - Deep Calm / Darker Light & Lighter Dark) */
+  .liven-light2 {
+    --background: 145 20% 92%;
+    /* Fundo sálvia super claro/quente, levemente mais escuro que liven-light */
+    --foreground: 145 25% 18%;
+    /* Texto cinza/verde escuro */
+
+    --muted: 145 15% 86%;
+    --muted-foreground: 145 20% 40%;
+
+    --popover: 145 20% 92%;
+    --popover-foreground: 145 25% 18%;
+
+    --card: 0 0% 100%;
+    /* Cards brancos */
+    --card-foreground: 145 25% 18%;
+
+    --border: 145 15% 82%;
+    --input: 145 15% 82%;
+
+    --primary: 145 42% 38%;
+    /* Verde principal Liven */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 145 15% 86%;
+    --secondary-foreground: 145 25% 18%;
+
+    --accent: 145 15% 86%;
+    --accent-foreground: 145 25% 18%;
+
+    --destructive: 0 71% 66%;
+    --destructive-foreground: 0 0% 100%;
+
+    --ring: 145 42% 38%;
+  }
+
+  .liven-dark2 {
+    --background: 145 20% 18%;
+    /* Fundo floresta suave, mais claro que o liven-dark (12%) */
+    --foreground: 45 30% 92%;
+    /* Texto creme */
+
+    --muted: 145 15% 24%;
+    --muted-foreground: 45 20% 70%;
+
+    --popover: 145 20% 18%;
+    --popover-foreground: 45 30% 92%;
+
+    --card: 145 18% 21%;
+    /* Cards levemente mais claros */
+    --card-foreground: 45 30% 92%;
+
+    --border: 145 15% 28%;
+    --input: 145 15% 28%;
+
+    --primary: 145 40% 52%;
+    /* Verde principal, mais claro para legibilidade nesse dark mode "light" */
+    --primary-foreground: 145 30% 12%;
+    /* Texto do botão escuro */
+
+    --secondary: 145 15% 24%;
+    --secondary-foreground: 45 30% 92%;
+
+    --accent: 145 15% 24%;
+    --accent-foreground: 45 30% 92%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 85.7% 97.3%;
+
+    --ring: 145 15% 28%;
+  }
 }
 
 @layer base {

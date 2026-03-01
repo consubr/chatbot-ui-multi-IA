@@ -104,7 +104,11 @@ export default async function RootLayout({
             "yana-neutral-light",
             "yana-neutral-dark",
             "yana-sage-light",
-            "yana-sage-dark"
+            "yana-sage-dark",
+            "liven-light",
+            "liven-dark",
+            "liven-light2",
+            "liven-dark2"
           ]}
         >
           <TranslationsProvider
