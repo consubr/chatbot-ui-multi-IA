@@ -4,6 +4,7 @@ import { LLM_LIST } from "@/lib/models/llm/llm-list"
 import { cn } from "@/lib/utils"
 import {
   IconBolt,
+  IconBrandWhatsapp,
   IconCirclePlus,
   IconPlayerStopFilled,
   IconSend
@@ -219,6 +220,16 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
         <div className="absolute bottom-[76px] left-0 max-h-[300px] w-full overflow-auto rounded-xl dark:border-none">
           <ChatCommandInput />
         </div>
+
+        <a
+          className="text-muted-foreground absolute bottom-[12px] left-2 p-1 transition-colors hover:text-[#25D366]"
+          href="https://chat.whatsapp.com/DFli88muNhaHrxRmpCfcYs"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Comunidade no WhatsApp"
+        >
+          <IconBrandWhatsapp size={30} />
+        </a>
 
         <>
           {isAdmin && (
