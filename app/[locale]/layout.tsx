@@ -93,7 +93,19 @@ export default async function RootLayout({
         <Providers
           attribute="class"
           defaultTheme="yana-light"
-          themes={["light", "dark", "yana-light", "yana-dark", "yana-sepia"]}
+          themes={[
+            "light",
+            "dark",
+            "yana-light",
+            "yana-dark",
+            "yana-sepia",
+            "yana-clay-light",
+            "yana-clay-dark",
+            "yana-neutral-light",
+            "yana-neutral-dark",
+            "yana-sage-light",
+            "yana-sage-dark"
+          ]}
         >
           <TranslationsProvider
             namespaces={i18nNamespaces}
